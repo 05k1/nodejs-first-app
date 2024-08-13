@@ -27,7 +27,10 @@
     </div>
     <div class="wrapper-body">
       <% products.forEach(item=>{ %>
-      <div class="box-items">
+      <div
+        class="box-items"
+        onclick="window.location.href = '/products/detail/<%= item.id%>'"
+      >
         <div class="group-image">
           <img class="image-main" src="<%= item.image %>" alt="Ninedev" />
         </div>
