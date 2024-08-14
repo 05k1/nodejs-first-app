@@ -51,11 +51,34 @@ exports.postCreateProduct = (req, res) => {
     req.json("404");
   }
 };
+exports.putEditProduct = (req, res) => {
+  try {
+    const { body } = req;
+    const { id } = req.params;
+    const index = products.findIndex((item) => item.id == id);
+    products[index].name = body.name;
+    products[index].price = body.price;
+    products[index].price = body.price;
+    res.json(200);
+  } catch (error) {
+    req.json("404");
+  }
+};
 
 exports.getDetailProduct = (req, res) => {
   const { id } = req.params;
   const product = products.find((item) => item.id == id);
   res.render("product/detail", { product });
+};
+
+exports.getDetailProductByApi = (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = products.find((item) => item.id == id);
+    res.json(product);
+  } catch (error) {
+    res.json("404");
+  }
 };
 
 exports.deleteProduct = (req, res) => {
