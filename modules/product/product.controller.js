@@ -1,37 +1,13 @@
-let products = [
-  {
-    id: 1,
-    name: "Adidas Samba OG Shoes",
-    price: "2.000.000 VND",
-    image:
-      "https://www.outbacksylt.com/files/image/id/29692/fixed/1/w/1000/h/1000/n/adidas-samba-og-white-b75806-1.jpg",
-  },
-  {
-    id: 2,
-    name: "Nike Jordan 1",
-    price: "2.000.000 VND",
-    image: "https://www.glab.vn/storage/products/2023/05/12/645e09068edaf.jpg",
-  },
-  {
-    id: 3,
-    name: "Nike Dunk",
-    price: "2.500.000 VND",
-    image:
-      "https://bizweb.dktcdn.net/thumb/1024x1024/100/413/335/products/duyetfashion-nike-dunk-low-black-white-dd1391-100-dd1503-101-duyet-fashion-8-jpeg-1feca183-0585-412a-ae79-6bb72eebd04a-616ff778-ef3e-4fde-85bd-6988122fa5fc.jpg?v=1654677561477",
-  },
-  {
-    id: 4,
-    name: "Nike Blazer",
-    price: "1.500.000 VND",
-    image:
-      "https://bizweb.dktcdn.net/thumb/1024x1024/100/427/393/products/img-9250.jpg",
-  },
-];
+let products = [];
 
-exports.getAllProducts = (req, res) => {
+const ResponseType = require("../../dto/response.type");
+const ProductEntity = require("../../models/product.model");
+
+exports.getAllProducts = async (req, res) => {
+  const productList = await ProductEntity.find();
   res.render("product/index", {
     title: "05K1",
-    products,
+    products: productList,
   });
 };
 
@@ -39,55 +15,70 @@ exports.createProduct = (req, res) => {
   res.render("product/create");
 };
 
-exports.postCreateProduct = (req, res) => {
+exports.postCreateProduct = async (req, res) => {
   try {
-    const { body } = req;
-    products.push({
-      id: Number(Math.random()),
-      ...body,
-    });
-    res.json(200);
+    const {
+      body: { name, price, image },
+    } = req;
+    const product = new ProductEntity({ name, price, image });
+    await product.save();
+    res.json(new ResponseType(true).success());
   } catch (error) {
-    req.json("404");
+    res.json(new ResponseType(null).error());
   }
 };
-exports.putEditProduct = (req, res) => {
+exports.putEditProduct = async (req, res) => {
   try {
     const { body } = req;
     const { id } = req.params;
-    const index = products.findIndex((item) => item.id == id);
-    products[index].name = body.name;
-    products[index].price = body.price;
-    products[index].price = body.price;
-    res.json(200);
+    const updateProduct = await ProductEntity.findByIdAndUpdate(
+      id,
+      {
+        name: body.name,
+        price: body.price,
+        image: body.image,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updateProduct) {
+      res.json(new ResponseType(null).error());
+    }
+    res.json(new ResponseType(updateProduct).success());
   } catch (error) {
-    req.json("404");
+    res.json(new ResponseType(null).error());
   }
 };
 
-exports.getDetailProduct = (req, res) => {
+exports.getDetailProduct = async (req, res) => {
   const { id } = req.params;
-  const product = products.find((item) => item.id == id);
+  const product = await ProductEntity.findById(id);
   res.render("product/detail", { product });
 };
 
-exports.getDetailProductByApi = (req, res) => {
+exports.getDetailProductByApi = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = products.find((item) => item.id == id);
-    res.json(product);
+    const product = await ProductEntity.findById(id);
+    res.json(new ResponseType(product).success());
   } catch (error) {
-    res.json("404");
+    res.json(new ResponseType(null).error());
   }
 };
 
-exports.deleteProduct = (req, res) => {
+exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const index = products.findIndex((item) => item.id == id);
-    products.splice(index, 1);
-    res.json(200);
+    const deleteProduct = await ProductEntity.findByIdAndDelete(id);
+
+    if (!deleteProduct) {
+      res.json(new ResponseType(false).error());
+    }
+    res.json(new ResponseType(true).success());
   } catch (error) {
-    res.json("404");
+    res.json(new ResponseType(false).error());
   }
 };

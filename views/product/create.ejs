@@ -62,8 +62,8 @@
         },
       })
         .then((res) => res.json())
-        .then((data) => {
-          if (data.id) {
+        .then(({ data, message, code }) => {
+          if (code == 200) {
             nameProduct.value = data.name;
             priceProduct.value = data.price;
             imageProduct.value = data.image;
@@ -92,8 +92,8 @@
           body,
         })
           .then((res) => res.json())
-          .then((json) => {
-            if (json == 200) {
+          .then(({ code }) => {
+            if (code == 200) {
               window.location.href = "/products";
             }
           });
@@ -106,8 +106,8 @@
           body,
         })
           .then((res) => res.json())
-          .then((json) => {
-            if (json == 200) {
+          .then(({ code }) => {
+            if (code == 200) {
               window.location.href = "/products";
             }
           });
